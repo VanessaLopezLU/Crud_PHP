@@ -226,7 +226,8 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
                         <p class="card-text"><strong>Precio: <?php echo "$" . $producto['Precio']; ?></strong></p>
                         <form action="carrito.php" method="post">
                             <input type="hidden" name="producto_id" value="<?php echo $producto['Id']; ?>">
-                            <button type="submit" class="btn btn-primary">Agregar al Carrito</button>
+                            <button onclick="agregarAlCarrito(<?php echo $producto['Id']; ?>)">Agregar al Carrito</button>
+                            
                         </form>
                     </div>
                 </div>
