@@ -131,6 +131,8 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
     $sentencia->execute();
     $listaproductos = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 }
+$productosQuery = $pdo->query("SELECT * FROM Productos WHERE Categorizacion_id = 1"); // Ajusta la consulta según tus necesidades
+$productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -204,11 +206,9 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
                     <a class="nav-link" href="cuidado.php">Cuidado Facial</a>
                 </li>
                 <li style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="#">Accesorios</a>
+                    <a class="nav-link" href="accesorios.php">Accesorios</a>
                 </li>
-                <li style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="#">Perfumes</a>
-                </li>
+             
 
             </ul>
 
@@ -260,39 +260,24 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
     </script>
 
 
-    <div class="container mt-5">
-        <h1 class="mb-4">Bienvenido a Makeup Glam</h1>
-        <div class="card-deck">
-            <div class="card">
-                <img src="../Imagenes/makeup1.jpg" class="card-img-top" alt="Set de maquillaje 1">
-                <div class="card-body">
-                    <h5 class="card-title">Set de Maquillaje Profesional</h5>
-                    <p class="card-text">Kit completo de maquillaje para un look profesional.</p>
-                    <p class="card-text"><strong>Precio: $79.99</strong></p>
-                    <a href="#" class="btn btn-primary">Agregar al carrito</a>
+<div class="container mt-5">
+        <h1 class="mb-4">Bienvenido Make Up</h1>
+        <section class="contenedor">
+            <?php foreach ($productos as $producto) : ?>
+                <div class="item card">
+                    <img class="img-item" src="../Imagenes/<?php echo $producto['Imagen']; ?>" alt="<?php echo $producto['NombreProducto']; ?>">
+                    <div class="card-body">
+                        <h5 class="card-title titulo-item"><?php echo $producto['NombreProducto']; ?></h5>
+                        <p class="card-text"><?php echo $producto['Descripcion']; ?></p>
+                        <span class="precio-item"><?php echo "$" . $producto['Precio']; ?></span>
+                        <form action="carrito.php" method="post">
+    <input type="hidden" name="producto_id" value="<?php echo $producto['Id']; ?>">
+    <button type="submit" class="boton-item">Agregar al Carrito</button>
+</form>
+                    </div>
                 </div>
-            </div>
-
-            <div class="card">
-                <img src="../Imagenes/makeup2.jpg" class="card-img-top" alt="Paleta de sombras 1">
-                <div class="card-body">
-                    <h5 class="card-title">Paleta de Sombras de Ojos</h5>
-                    <p class="card-text">Amplia variedad de colores para crear looks impresionantes.</p>
-                    <p class="card-text"><strong>Precio: $29.99</strong></p>
-                    <a href="#" class="btn btn-primary">Agregar al carrito</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <img src="../Imagenes/makeup3.jpg" class="card-img-top" alt="Brochas de maquillaje 1">
-                <div class="card-body">
-                    <h5 class="card-title">Set de Brochas Profesionales</h5>
-                    <p class="card-text">Brochas suaves y duraderas para aplicar el maquillaje con precisión.</p>
-                    <p class="card-text"><strong>Precio: $19.99</strong></p>
-                    <a href="#" class="btn btn-primary">Agregar al carrito</a>
-                </div>
-            </div>
-        </div>
+            <?php endforeach; ?>
+        </section>
     </div>
     <br>
 

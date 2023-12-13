@@ -130,6 +130,8 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
     $sentencia->execute();
     $listaproductos = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 }
+$productosQuery = $pdo->query("SELECT * FROM Productos WHERE Categorizacion_id = 3"); // Ajusta la consulta según tus necesidades
+$productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -201,11 +203,9 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
                     <a class="nav-link" href="cuidado.php">Cuidado Facial</a>
                 </li>
                 <li style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="#">Accesorios</a>
+                    <a class="nav-link" href="accesorios.php">Accesorios</a>
                 </li>
-                <li style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="#">Perfumes</a>
-                </li>
+               
 
             </ul>
 
@@ -213,36 +213,40 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
         </div>
     </nav>
 
-
-
     <div class="container mt-5">
-        <h1 class="mb-4">Promociones Navideñas Makeup Glam</h1>
-        <div class="card-deck">
-            <div class="card">
-                <img src="../Imagenes/makeup1.jpg" class="card-img-top" alt="Set de maquillaje 1">
-                <div class="card-body">
-                    <h5 class="card-title">Set de Maquillaje Profesional</h5>
-                    <p class="card-text">Kit completo de maquillaje para un look profesional.</p>
-                    <p class="card-text"><strong>Precio: $79.99</strong></p>
-                    <a href="#" class="btn btn-primary">Agregar al carrito</a>
+    <h1 class="mb-4">Maquillaje</h1>
+    <div class="row">
+        <?php foreach ($productos as $producto) : ?>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img class="card-img-top" src="../Imagenes/<?php echo $producto['Imagen']; ?>" alt="<?php echo $producto['NombreProducto']; ?>">
+                    <div class="card-body">
+                        <h5 class="card-title"><?php echo $producto['NombreProducto']; ?></h5>
+                        <p class="card-text"><?php echo $producto['Descripcion']; ?></p>
+                        <p class="card-text"><strong>Precio: <?php echo "$" . $producto['Precio']; ?></strong></p>
+                        <form action="carrito.php" method="post">
+                            <input type="hidden" name="producto_id" value="<?php echo $producto['Id']; ?>">
+                            <button type="submit" class="btn btn-primary">Agregar al Carrito</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-
-        </div>
+        <?php endforeach; ?>
     </div>
+</div>
     <br>
 
     <footer style="background-color: #EBDEF0; color: black; padding: 20px 0;">
 
         <div class="row">
-            <div style="margin-left: 20px" class="col-md-4">
+        <div style="margin-left: 20px" class="col-md-4">
                 <h4>Redes Sociales</h4>
                 <ul class="list-unstyled">
-                    <li><a href="https://es-la.facebook.com/" style="color: #fff;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Logo_de_Facebook.png/1200px-Logo_de_Facebook.png" alt="Facebook" style="max-width: 30px; max-height: 30px;"> Facebook</a></li>
+                    <li><a href="https://es-la.facebook.com/" style="color:black;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Logo_de_Facebook.png/1200px-Logo_de_Facebook.png" alt="Facebook" style="max-width: 30px; max-height: 30px;"> Facebook</a></li>
                     <br>
-                    <li><a href="https://www.instagram.com/" style="color: #fff;"><img src="https://elordenmundial.com/wp-content/uploads/2021/10/instagram-aplicacion-tecnologia-lanzamiento-sociedad-historia.jpg" alt="Instagram" style="max-width: 30px; max-height: 30px;"> Instagram</a></li>
+                    <li><a href="https://www.instagram.com/" style="color: black;"><img src="https://elordenmundial.com/wp-content/uploads/2021/10/instagram-aplicacion-tecnologia-lanzamiento-sociedad-historia.jpg" alt="Instagram" style="max-width: 30px; max-height: 30px;"> Instagram</a></li>
                     <br>
-                    <li><a href="https://web.whatsapp.com/" style="color: #fff;"><img src="https://img.freepik.com/vector-premium/concepto-icono-whatsapp_23-2147897840.jpg?size=626&ext=jpg&ga=GA1.1.379066732.1702397873&semt=ais" alt="WhatsApp" style="max-width: 50px; max-height: 30px;"> WhatsApp</a></li>
+                    <li><a href="https://web.whatsapp.com/" style="color: black;"><img src="https://img.freepik.com/vector-premium/concepto-icono-whatsapp_23-2147897840.jpg?size=626&ext=jpg&ga=GA1.1.379066732.1702397873&semt=ais" alt="WhatsApp" style="max-width: 50px; max-height: 30px;"> WhatsApp</a></li>
                 </ul>
 
 

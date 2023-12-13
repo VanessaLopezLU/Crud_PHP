@@ -108,6 +108,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #dc3545;
             margin-top: 10px;
         }
+        .btn-block {
+            color: #fff;
+            background-color: #BB8FCE;
+            border-color: #D2B4DE;
+            margin-left: 80%,
+        }
+
+        .btn-block:hover {
+            background-color: #D2B4DE;
+            /* Color de fondo al pasar el cursor */
+            border-color: #BB8FCE;
+            /* Color del borde al pasar el cursor */
+        }
     </style>
 </head>
 <body>
@@ -137,9 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li   style="margin-left: 20px" class="nav-item">
                     <a class="nav-link" href="#">Accesorios</a>
                 </li>
-                <li   style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="#">Perfumes</a>
-                </li>
+               
             </ul>
            
     
@@ -147,15 +158,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </nav>
 
 <div class="container mt-5">
-    <h1 class="mb-4">Iniciar Sesión</h1>
+    <h1  style="color: #D7BDE2" class="mb-4">Iniciar Sesión</h1>
+    
     <form method="post" action="">
+        <center>
+        <img src="../Imagenes/logo.jpg" width="100px"alt="">
+        </center>
+     
         <label for="NombreAdmin">Nombre de Usuario:</label>
         <input type="text" name="NombreAdmin" class="form-control" required>
         <br>
         <label for="Clave">Contraseña:</label>
         <input type="password" name="Clave" class="form-control" required>
         <br>
-        <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+        <button type="submit" class="btn btn-block">Iniciar Sesión</button>
     </form>
     <?php if ($mensajeError) echo "<p class='text-danger'>$mensajeError</p>"; ?>
 </div>

@@ -1,7 +1,6 @@
 <?php
 include("../Conexion/conexion.php");
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+
 $accionAgregar = "";
 $accionModificar = $accionEliminar = $accionCancelar = "disabled";
 $mostrarmodal = false;
@@ -131,7 +130,7 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
     $sentencia->execute();
     $listaproductos = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 }
-$productosQuery = $pdo->query("SELECT * FROM Productos WHERE Categorizacion_id = 2"); // Ajusta la consulta según tus necesidades
+$productosQuery = $pdo->query("SELECT * FROM Productos WHERE Categorizacion_id = 5"); // Ajusta la consulta según tus necesidades
 $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -144,7 +143,6 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
     <style>
         .form-inline .form-control {
             width: 350px;
@@ -160,7 +158,6 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
 
         .encabezado {
             background-color: #E8DAEF;
-
         }
     </style>
 
@@ -198,25 +195,26 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
                 <li style="margin-left: 20px" class="nav-item">
                     <a class="nav-link" href="index.php">Inicio</a>
                 </li>
-
                 <li style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="maquillaje.php">Maquillajes</a>
+                    <a class="nav-link" href="promociones.php">Promociones Navideñas</a>
                 </li>
+
                 <li style="margin-left: 20px" class="nav-item">
                     <a class="nav-link" href="cuidado.php">Cuidado Facial</a>
                 </li>
-                <li style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="accesorios.php">Accesorios</a>
-                </li>
                 
+               
 
             </ul>
 
 
         </div>
     </nav>
+
+
+
     <div class="container mt-5">
-    <h1 class="mb-4">Promociones Navideñas</h1>
+    <h1 class="mb-4">Accesorios</h1>
     <div class="row">
         <?php foreach ($productos as $producto) : ?>
             <div class="col-md-4 mb-4">
@@ -236,9 +234,8 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
         <?php endforeach; ?>
     </div>
 </div>
-
-
     <br>
+
     <footer style="background-color: #EBDEF0; color: black; padding: 20px 0;">
 
         <div class="row">

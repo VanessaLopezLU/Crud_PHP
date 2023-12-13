@@ -1,6 +1,7 @@
 <?php
 include("../Conexion/conexion.php");
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 $accionAgregar = "";
 $accionModificar = $accionEliminar = $accionCancelar = "disabled";
 $mostrarmodal = false;
@@ -130,6 +131,8 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
     $sentencia->execute();
     $listaproductos = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 }
+$productosQuery = $pdo->query("SELECT * FROM Productos WHERE Categorizacion_id = 4"); // Ajusta la consulta según tus necesidades
+$productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -156,6 +159,7 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
 
         .encabezado {
             background-color: #E8DAEF;
+
         }
     </style>
 
@@ -196,91 +200,47 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
                 <li style="margin-left: 20px" class="nav-item">
                     <a class="nav-link" href="promociones.php">Promociones Navideñas</a>
                 </li>
+
                 <li style="margin-left: 20px" class="nav-item">
                     <a class="nav-link" href="maquillaje.php">Maquillajes</a>
                 </li>
-
+               
                 <li style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="#">Accesorios</a>
+                    <a class="nav-link" href="accesorios.php">Accesorios</a>
                 </li>
-                <li style="margin-left: 20px" class="nav-item">
-                    <a class="nav-link" href="#">Perfumes</a>
-                </li>
+               
 
             </ul>
 
 
         </div>
     </nav>
-
-    <div style="height: 30%" class="container mt-5">
-        <div id="carouselExampleIndicators" class="carousel slide mt-5" data-ride="carousel">
-            <ol class="carousel-indicators">
-                <?php
-
-                $imagenes = array("../Imagenes/carusel1.jpg", "../Imagenes/carusel2.jpg");
-                for ($i = 0; $i < count($imagenes); $i++) {
-                    $active = ($i == 0) ? 'class="active"' : '';
-                ?>
-                    <li data-target="#carouselExampleIndicators" data-slide-to="<?php echo $i; ?>" <?php echo $active; ?>></li>
-                <?php } ?>
-            </ol>
-            <div class="carousel-inner">
-                <?php
-                foreach ($imagenes as $key => $imagen) {
-                    $active = ($key == 0) ? 'active' : '';
-                ?>
-                    <div class="carousel-item <?php echo $active; ?>">
-                        <img src="<?php echo $imagen; ?>" class="d-block w-100" alt="Imagen de maquillaje">
-                    </div>
-                <?php } ?>
-            </div>
-            <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
-        </div>
-    </div>
-
-
-
-
-    <script>
-        // Este script activa el carrusel utilizando Bootstrap
-        $(document).ready(function() {
-            $('.carousel').carousel();
-        });
-    </script>
-
-
     <div class="container mt-5">
-        <h1 class="mb-4">Bienvenido a Makeup Glam</h1>
-        <div class="card-deck">
-            <div class="card">
-                <img src="../Imagenes/makeup1.jpg" class="card-img-top" alt="Set de maquillaje 1">
-                <div class="card-body">
-                    <h5 class="card-title">Set de Maquillaje Profesional</h5>
-                    <p class="card-text">Kit completo de maquillaje para un look profesional.</p>
-                    <p class="card-text"><strong>Precio: $79.99</strong></p>
-                    <a href="#" class="btn btn-primary">Agregar al carrito</a>
+    <h1 class="mb-4">Cuidado Facial</h1>
+    <div class="row">
+        <?php foreach ($productos as $producto) : ?>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img class="card-img-top" src="../Imagenes/<?php echo $producto['Imagen']; ?>" alt="<?php echo $producto['NombreProducto']; ?>">
+                    <div class="card-body">
+                        <h5 class="card-title"><?php echo $producto['NombreProducto']; ?></h5>
+                        <p class="card-text"><?php echo $producto['Descripcion']; ?></p>
+                        <p class="card-text"><strong>Precio: <?php echo "$" . $producto['Precio']; ?></strong></p>
+                        <form action="carrito.php" method="post">
+                            <input type="hidden" name="producto_id" value="<?php echo $producto['Id']; ?>">
+                            <button type="submit" class="btn btn-primary">Agregar al Carrito</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-
-
-
-
-        </div>
+        <?php endforeach; ?>
     </div>
+</div>
     <br>
-
     <footer style="background-color: #EBDEF0; color: black; padding: 20px 0;">
 
         <div class="row">
-            <div style="margin-left: 20px" class="col-md-4">
+        <div style="margin-left: 20px" class="col-md-4">
                 <h4>Redes Sociales</h4>
                 <ul class="list-unstyled">
                     <li><a href="https://es-la.facebook.com/" style="color:black;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Logo_de_Facebook.png/1200px-Logo_de_Facebook.png" alt="Facebook" style="max-width: 30px; max-height: 30px;"> Facebook</a></li>

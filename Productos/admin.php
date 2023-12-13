@@ -4,11 +4,15 @@ ini_set('display_errors', 1);
 session_start();
 include("../Conexion/conexion.php");
 
+$host = "localhost";
+$dbname = "Tienda";
+$username = "root";
+$password = "";
+
 $accionAgregar = "";
 $accionModificar = $accionEliminar = $accionCancelar = "disabled";
 $mostrarmodal = false;
 
-$txtid = (isset($_POST['txtid'])) ? $_POST['txtid'] : "";
 $txtnombre = (isset($_POST['txtnombre'])) ? $_POST['txtnombre'] : "";
 $txtdescripcion = (isset($_POST['txtdescripcion'])) ? $_POST['txtdescripcion'] : "";
 $txtprecio = (isset($_POST['txtprecio'])) ? $_POST['txtprecio'] : "";
@@ -19,75 +23,82 @@ $categorizacion = isset($_POST['Categorizacion']) ? $_POST['Categorizacion'] : "
 $accion = (isset($_POST['accion'])) ? $_POST['accion'] : "";
 
 switch ($accion) {
-    case "registrar_producto":
-        $sentencia = $pdo->prepare("INSERT INTO productos (NombreProducto, Descripcion, Precio, Imagen, Categorizacion_id) 
-    VALUES (:NombreProducto, :Descripcion, :Precio, :Imagen, :Categorizacion_id)");
+    case "registrar":
+        $sentencia = $pdo->prepare("INSERT INTO Productos (NombreProducto, Descripcion, Precio, Imagen, Categorizacion_id) 
+           VALUES (:NombreProducto, :Descripcion, :Precio, :Imagen, :Categorizacion_id)");
         $sentencia->bindParam(':NombreProducto', $txtnombre);
         $sentencia->bindParam(':Descripcion', $txtdescripcion);
         $sentencia->bindParam(':Precio', $txtprecio);
-        $sentencia->bindParam(':Categorizacion_id', $categorizacion);
+        $sentencia->bindParam(':Categorizacion_id', $categorizacion); // Aquí está el valor de la categorización
+
 
         $fecha = new DateTime();
-        $nombrearchivo = ($txtimagen != "" ? $fecha->getTimestamp() . "_" . $_FILES["txtimagen"]["name"] : "producto.jpg");
+        $nombrearchivo = ($txtimagen != "" ? $fecha->getTimestamp() . "_" . $_FILES["txtimagen"]["name"] : "logo.jpg");
         $tmpimagen = $_FILES["txtimagen"]["tmp_name"];
 
         if ($tmpimagen != "") {
             move_uploaded_file($tmpimagen, "../Imagenes/" . $nombrearchivo);
         }
         $sentencia->bindParam(':Imagen', $nombrearchivo);
-        // Suponiendo que $categorizacion contiene el ID de la categorización seleccionada
-        $sentencia->bindParam(':Categorizacion_id', $categorizacion);
-        $sentencia->execute();
-
+        
         if ($sentencia) {
             echo "Producto agregado con éxito.";
         } else {
             echo "Error al agregar el producto.";
         }
+        $sentencia->execute();
+
         break;
 
 
-    case "btnmodificar":
-        $sentencia = $pdo->prepare("UPDATE productos SET NombreProducto = :NombreProducto,
-        Descripcion = :Descripcion,
-        Precio = :Precio
-        WHERE Id = :Id");
-        $sentencia->bindParam(':NombreProducto', $txtnombre);
-        $sentencia->bindParam(':Descripcion', $txtdescripcion);
-        $sentencia->bindParam(':Precio', $txtprecio);
-        $sentencia->bindParam(':Id', $txtid);
-
-        $fecha = new DateTime();
-        $nombrearchivo = ($txtimagen != "" ? $fecha->getTimestamp() . "_" . $_FILES['txtimagen']["name"] : "producto.jpg");
-        $tmpimagen = $_FILES['txtimagen']["tmp_name"];
-
-        if ($tmpimagen != "") {
-            move_uploaded_file($tmpimagen, "../Imagenes/" . $nombrearchivo);
-            $sentencia = $pdo->prepare("SELECT Imagen FROM productos WHERE Id=:Id");
+        case "editar":
+            $sentencia = $pdo->prepare("UPDATE productos SET NombreProducto = :NombreProducto,
+            Descripcion = :Descripcion,
+            Precio = :Precio,
+            Imagen = :Imagen
+            WHERE Id = :Id");
+        
+            $sentencia->bindParam(':NombreProducto', $txtnombre);
+            $sentencia->bindParam(':Descripcion', $txtdescripcion);
+            $sentencia->bindParam(':Precio', $txtprecio);
+            $sentencia->bindParam(':Imagen', $txtimagen);
             $sentencia->bindParam(':Id', $txtid);
-            $sentencia->execute();
-            $producto = $sentencia->fetch(PDO::FETCH_LAZY);
-
-            if (isset($_FILES["txtimagen"])) {
+        
+            $fecha = new DateTime();
+            $nombrearchivo = ($txtimagen != "" ? $fecha->getTimestamp() . "_" . $_FILES['txtimagen']["name"] : "producto.jpg");
+            $tmpimagen = $_FILES['txtimagen']["tmp_name"];
+        
+            if ($tmpimagen != "") {
+                move_uploaded_file($tmpimagen, "../Imagenes/" . $nombrearchivo);
+        
+                // Eliminar imagen anterior si existe
+                $sentencia = $pdo->prepare("SELECT Imagen FROM productos WHERE Id=:Id");
+                $sentencia->bindParam(':Id', $txtid);
+                $sentencia->execute();
+                $producto = $sentencia->fetch(PDO::FETCH_ASSOC);
+        
                 if (file_exists("../Imagenes/" . $producto['Imagen'])) {
                     unlink("../Imagenes/" . $producto["Imagen"]);
                 }
+        
+                // Actualizar el nombre del archivo en la base de datos
+                $sentencia = $pdo->prepare("UPDATE productos SET Imagen = :Imagen WHERE Id = :Id");
+                $sentencia->bindParam(':Imagen', $nombrearchivo);
+                $sentencia->bindParam(':Id', $txtid);
+                $sentencia->execute();
             }
-
-            $sentencia = $pdo->prepare("UPDATE productos SET Imagen = :Imagen WHERE Id = :Id");
-            $sentencia->bindParam(':Imagen', $nombrearchivo);
-            $sentencia->bindParam(':Id', $txtid);
-            $sentencia->execute();
-        }
-        if ($sentencia->execute()) {
-            echo "Producto modificado con éxito.";
-        } else {
-            echo "Error al modificar el producto.";
-        }
-        break;
+        
+            // Ejecutar la actualización de los datos del producto
+            if ($sentencia->execute()) {
+                echo "Producto modificado con éxito.";
+            } else {
+                echo "Error al modificar el producto.";
+            }
+            break;
+        
 
     case "btneliminar":
-        $sentencia = $pdo->prepare("SELECT Imagen  FROM productos  WHERE Id = :Id");
+        $sentencia = $pdo->prepare("SELECT Imagen  FROM Productos  WHERE Id = :Id");
         $sentencia->bindParam(':Id', $txtid);
         $sentencia->execute();
         $producto = $sentencia->fetch(PDO::FETCH_LAZY);
@@ -136,17 +147,40 @@ if (isset($_POST['btnbuscar']) && !empty($_POST['txtbuscar'])) {
     $listaproductos = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 }
 try {
-    $categorizacionQuery = $pdo->query("SELECT Id, Nombre FROM categorizacion");
+    $categorizacionQuery = $pdo->query("SELECT Id, Nombre FROM Categorizacion");
     $categorizacion = $categorizacionQuery->fetchAll(PDO::FETCH_ASSOC);
 
-    if ($categorizacion) {
-        // Aquí puedes trabajar con los resultados obtenidos
-        // ...
-    } else {
+    if (!$categorizacion) {
         echo "No se encontraron categorías.";
+        
     }
+
 } catch (PDOException $e) {
     echo "Error al obtener categorías: " . $e->getMessage();
+    
+}
+$sentencia->execute();
+
+
+// Si se envía el formulario
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Verificar si se ha seleccionado una categorización
+    if (isset($_POST['Categorizacion'])) {
+        // Obtener el ID de la categorización seleccionada
+        $categorizacion = $_POST['Categorizacion'];
+
+    } else {
+        echo "Por favor, selecciona una categorización.";
+    }
+    $sentencia->execute();
+
+}
+if (isset($_GET['logout']) && $_GET['logout'] == 'true') {
+    // Si se hace clic en "Cerrar Sesión", destruir la sesión
+    session_destroy();
+    // Redirigir a una página o realizar cualquier otra acción después de cerrar sesión
+    header("Location: index.php");
+    exit();
 }
 
 ?>
@@ -246,14 +280,26 @@ try {
             border-color: #BB8FCE;
             /* Color del borde al pasar el cursor */
         }
+        .ti{
+            width: 30%;
+         
+        }
+        .img{
+            width: 40%;
+        }
     </style>
 </head>
 
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="img">
         <img src="../Imagenes/logo.jpg" alt="" width="100px" height="50px" style="margin-top: 10px;">
-        <a class="navbar-brand" href="#">Makeup Glam</a>
+        </div>
+        
+        <div  style="font-size: 20%" class="ti" >
+        <h1 style="font-size: 40px,color: black">Makeup Glam</h1> 
+        </div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -272,11 +318,11 @@ try {
         <form method="post" action="" enctype="multipart/form-data" style="max-width: 500px; margin: auto;">
             <div class="form-group">
                 <label for="txtnombre">Nombre:</label>
-                <input type="text" name="nombre" class="form-control" required>
+                <input type="text" name="txtnombre" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="txtdescripcion">Descripción:</label>
-                <textarea name="descripcion" class="form-control" rows="3" required></textarea>
+                <textarea name="txtdescripcion" class="form-control" rows="3" required></textarea>
             </div>
             <div class="form-group">
                 <label for="txtprecio">Precio:</label>
@@ -284,7 +330,7 @@ try {
                     <div class="input-group-prepend">
                         <span class="input-group-text">$</span>
                     </div>
-                    <input type="text" name="precio" class="form-control" required>
+                    <input type="number" name="txtprecio" class="form-control" required>
                 </div>
             </div>
             <div class="form-group">
@@ -299,13 +345,16 @@ try {
             </div>
             <div class="form-group">
                 <label for="Categorizacion">Categorización:</label>
-                <select name="Categorizacion" class="form-control" required>
-                    <?php foreach ($categorizacion as $categoria) : ?>
-                        <option value="<?= $categoria['Id']; ?>"><?= $categoria['Nombre']; ?></option>
-                    <?php endforeach; ?>
-                </select>
+             <select name="Categorizacion" class="form-control" required>
+                <?php foreach ($categorizacion as $categoria) : ?>
+                   <option value="<?= $categoria['Id']; ?>"><?= $categoria['Nombre']; ?></option>
+               <?php endforeach; ?>
+               
+             </select>
+
             </div>
-            <button type="submit" name="registrar_producto" class=" btn-block">Registrar Producto</button>
+            <button <?php echo $accionAgregar ?> value="registrar" type="submit" name="accion" class=" btn-block">registrar producto</button>
+
         </form>
     </div>
     <table class="table">
@@ -319,34 +368,36 @@ try {
             </tr>
         </thead>
         <tbody>
-            <?php
-            $sentenciaProductos = $pdo->prepare("SELECT * FROM productos");
-            $sentenciaProductos->execute();
-            $productos = $sentenciaProductos->fetchAll(PDO::FETCH_ASSOC);
-            // Mostrar la lista de productos en la tabla
-            foreach ($productos as $producto) {
-                echo "<tr>";
-                // Mostrar la imagen del producto
-                echo "<td><img src='{$producto['Imagen']}' alt='{$producto['NombreProducto']}' style='max-width: 100px;'></td>";
-                // Mostrar el nombre, descripción, precio del producto en celdas separadas
-                echo "<td>{$producto['NombreProducto']}</td>";
-                echo "<td>{$producto['Descripcion']}</td>";
-                echo "<td>{$producto['Precio']}</td>";
-                // Agregar botones para editar y eliminar
-                echo "<td>";
-                echo "<form action='editar_producto.php' method='post' style='display:inline;'>";
-                echo "<input type='hidden' name='id' value='{$producto['Id']}'>";
-                echo "<button type='submit' class='btn btn-primary'>Editar</button>";
-                echo "</form>";
-                echo "<form action='eliminar_producto.php' method='post' style='display:inline;' onsubmit='return confirm(\"¿Estás seguro?\");'>";
-                echo "<input type='hidden' name='id' value='{$producto['Id']}'>";
-                echo "<button type='submit' class='btn btn-danger'>Eliminar</button>";
-                echo "</form>";
-                echo "</td>";
-                echo "</tr>";
-            }
-            ?>
-        </tbody>
+    <?php
+    $sentenciaProductos = $pdo->prepare("SELECT * FROM Productos");
+    $sentenciaProductos->execute();
+    $productos = $sentenciaProductos->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Mostrar la lista de productos en la tabla
+    foreach ($productos as $producto) {
+        echo "<tr>";
+        // Mostrar la imagen del producto
+        echo "<td><img src='../Imagenes/" . $producto['Imagen'] . "' alt='" . $producto['NombreProducto'] . "' style='max-width: 100px;'></td>";
+        // Mostrar el nombre, descripción, precio del producto en celdas separadas
+        echo "<td>{$producto['NombreProducto']}</td>";
+        echo "<td>{$producto['Descripcion']}</td>";
+        echo "<td>{$producto['Precio']}</td>";
+        // Agregar botones para editar y eliminar
+        echo "<td>";
+        echo "<form action='' method='post' style='display:inline;'>";
+        echo "<input type='hidden' name='id' value='{$producto['Id']}'>";
+        echo "<button type='submit' class='btn btn-primary'>Editar</button>";
+        echo "</form>";
+        echo "<form action='eliminar_producto.php' method='post' style='display:inline;' onsubmit='return confirm(\"¿Estás seguro?\");'>";
+        echo "<input type='hidden' name='id' value='{$producto['Id']}'>";
+        echo "<button type='submit' class='btn btn-danger'>Eliminar</button>";
+        echo "</form>";
+        echo "</td>";
+        echo "</tr>";
+    }
+    ?>
+</tbody>
+
     </table>
 
     <footer style="text-align: center; padding: 10px; background-color: #f8f9fa;">
