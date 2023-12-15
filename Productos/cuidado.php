@@ -95,7 +95,7 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="collapse navbar-collapse" id="navbarNav">
 
-            <a class="btn btn-outline-info ml-2" href="#">Carrito</a>
+          
         </div>
     </nav>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">

@@ -93,26 +93,7 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="collapse navbar-collapse" id="navbarNav">
             <a class="btn btn-outline-info ml-2" href="login.php">Inicio de secion</a>
-            <!-- Botón Carrito -->
-<a class="btn btn-outline-info ml-2" href="#" onclick="mostrarProductosSeleccionados()">Carrito</a>
 
-<!-- Modal para mostrar los productos seleccionados -->
-<div class="modal" id="modalProductosSeleccionados">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Productos en el carrito</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body" id="contenidoProductos">
-                <!-- Aquí se mostrarán los productos seleccionados -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
         </div>
     </nav>
