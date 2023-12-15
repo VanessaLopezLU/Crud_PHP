@@ -15,96 +15,6 @@ $txtimagen = (isset($_FILES['txtimagen']["name"])) ? $_FILES['txtimagen']["name"
 $accion = (isset($_POST['accion'])) ? $_POST['accion'] : "";
 
 switch ($accion) {
-    case "btnagregar":
-        $sentencia = $pdo->prepare("INSERT INTO productos (Nombre, Descripcion, Precio, Imagen) 
-        VALUES (:Nombre, :Descripcion, :Precio, :Imagen)");
-        $sentencia->bindParam(':Nombre', $txtnombre);
-        $sentencia->bindParam(':Descripcion', $txtdescripcion);
-        $sentencia->bindParam(':Precio', $txtprecio);
-
-        $fecha = new DateTime();
-        $nombrearchivo = ($txtimagen != "" ? $fecha->getTimestamp() . "_" . $_FILES["txtimagen"]["name"] : "producto.jpg");
-        $tmpimagen = $_FILES["txtimagen"]["tmp_name"];
-
-        if ($tmpimagen != "") {
-            move_uploaded_file($tmpimagen, "../Imagenes/" . $nombrearchivo);
-        }
-        $sentencia->bindParam(':Imagen', $nombrearchivo);
-        $sentencia->execute();
-
-        if ($sentencia) {
-            echo "Producto agregado con éxito.";
-        } else {
-            echo "Error al agregar el producto.";
-        }
-        break;
-        // ... (your previous code)
-
-    case "btnmodificar":
-        $sentencia = $pdo->prepare("UPDATE productos SET Nombre = :Nombre,
-    Descripcion = :Descripcion,
-    Precio = :Precio
-    WHERE Id = :Id");
-        $sentencia->bindParam(':Nombre', $txtnombre);
-        $sentencia->bindParam(':Descripcion', $txtdescripcion);
-        $sentencia->bindParam(':Precio', $txtprecio);
-        $sentencia->bindParam(':Id', $txtid);
-
-        $fecha = new DateTime();
-        $nombrearchivo = ($txtimagen != "" ? $fecha->getTimestamp() . "_" . $_FILES['txtimagen']["name"] : "producto.jpg");
-        $tmpimagen = $_FILES['txtimagen']["tmp_name"];
-
-        if ($tmpimagen != "") {
-            move_uploaded_file($tmpimagen, "../imagenes/" . $nombrearchivo);
-
-            $sentencia = $pdo->prepare("SELECT Imagen FROM productos WHERE Id=:Id");
-            $sentencia->bindParam(':Id', $txtid);
-            $sentencia->execute();
-            $producto = $sentencia->fetch(PDO::FETCH_LAZY);
-
-            if (isset($_FILES["txtimagen"])) {
-                if (file_exists("../imagenes/" . $producto['Imagen'])) {
-                    unlink("../imagenes/" . $producto["Imagen"]);
-                }
-            }
-
-            $sentencia = $pdo->prepare("UPDATE productos SET Imagen = :Imagen WHERE Id = :Id");
-            $sentencia->bindParam(':Imagen', $nombrearchivo);
-            $sentencia->bindParam(':Id', $txtid);
-            $sentencia->execute();
-        }
-
-        header('location: index.php');
-
-        if ($sentencia->execute()) {
-            echo "Producto modificado con éxito.";
-        } else {
-            echo "Error al modificar el producto.";
-        }
-        break;
-
-    case "btneliminar":
-        $sentencia = $pdo->prepare("SELECT Imagen  FROM productos  WHERE Id = :Id");
-        $sentencia->bindParam(':Id', $txtid);
-        $sentencia->execute();
-        $producto = $sentencia->fetch(PDO::FETCH_LAZY);
-
-        if (isset($_POST["txtimagen"])) {
-            if (file_exists("../Imagenes/" . $producto["Imagen"])) {
-                unlink("../Imagenes/" . $producto["Imagen"]);
-            }
-        }
-
-        $sentencia = $pdo->prepare("DELETE FROM productos WHERE Id = :Id");
-        $sentencia->bindParam(':Id', $txtid);
-
-        if ($sentencia->execute()) {
-            echo "El producto ha sido eliminado con éxito.";
-            header("location: index.php");
-        } else {
-            echo "Error al eliminar el producto.";
-        }
-        break;
 
     case "Seleccionar":
         $accionAgregar = "disabled";
@@ -183,7 +93,27 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="collapse navbar-collapse" id="navbarNav">
             <a class="btn btn-outline-info ml-2" href="login.php">Inicio de secion</a>
-            <a class="btn btn-outline-info ml-2" href="#">Carrito</a>
+            <!-- Botón Carrito -->
+<a class="btn btn-outline-info ml-2" href="#" onclick="mostrarProductosSeleccionados()">Carrito</a>
+
+<!-- Modal para mostrar los productos seleccionados -->
+<div class="modal" id="modalProductosSeleccionados">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Productos en el carrito</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" id="contenidoProductos">
+                <!-- Aquí se mostrarán los productos seleccionados -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
         </div>
     </nav>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -221,7 +151,7 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
             <ol class="carousel-indicators">
                 <?php
 
-                $imagenes = array("../Imagenes/carusel1.jpg", "../Imagenes/carusel2.jpg");
+                $imagenes = array("../Imagenes/car.jpg", "../Imagenes/carusel2.jpg");
                 for ($i = 0; $i < count($imagenes); $i++) {
                     $active = ($i == 0) ? 'class="active"' : '';
                 ?>
@@ -261,24 +191,26 @@ $productos = $productosQuery->fetchAll(PDO::FETCH_ASSOC);
 
 
 <div class="container mt-5">
-        <h1 class="mb-4">Bienvenido Make Up</h1>
-        <section class="contenedor">
-            <?php foreach ($productos as $producto) : ?>
-                <div class="item card">
-                    <img class="img-item" src="../Imagenes/<?php echo $producto['Imagen']; ?>" alt="<?php echo $producto['NombreProducto']; ?>">
+    <h1 class="mb-4">Makeup Glam</h1>
+    <div class="row">
+        <?php foreach ($productos as $producto) : ?>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img class="card-img-top" src="../Imagenes/<?php echo $producto['Imagen']; ?>" alt="<?php echo $producto['NombreProducto']; ?>">
                     <div class="card-body">
-                        <h5 class="card-title titulo-item"><?php echo $producto['NombreProducto']; ?></h5>
+                        <h5 class="card-title"><?php echo $producto['NombreProducto']; ?></h5>
                         <p class="card-text"><?php echo $producto['Descripcion']; ?></p>
-                        <span class="precio-item"><?php echo "$" . $producto['Precio']; ?></span>
+                        <p class="card-text"><strong>Precio: <?php echo "$" . $producto['Precio']; ?></strong></p>
                         <form action="carrito.php" method="post">
-    <input type="hidden" name="producto_id" value="<?php echo $producto['Id']; ?>">
-    <button type="submit" class="boton-item">Agregar al Carrito</button>
-</form>
+                        <input type="hidden" name="producto_id" value="<?php echo $producto['Id']; ?>">
+                        <button type="button" class="btn btn-primary agregar-carrito">Agregar al Carrito</button>
+                        </form>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        </section>
+            </div>
+        <?php endforeach; ?>
     </div>
+</div>
     <br>
 
     <footer style="background-color: #EBDEF0; color: black; padding: 20px 0;">
